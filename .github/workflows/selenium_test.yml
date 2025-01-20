@@ -1,29 +1,52 @@
 name: test-selenium
-on: 
+on:
   push:
-    branches:
-      - master
+    branches: 
+      - main
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - 
-        name: Checkout Repository
+      - name: Checkout Repository
         uses: actions/checkout@v2
-      - 
-        name: Setup Python
+
+      - name: Setup Python
         uses: actions/setup-python@v2
-      - 
-        name: Install Chrome
+        with:
+          python-version: 3.12
+
+      - name: Install Google Chrome
         run: |
-          sudo wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          sudo apt update
-          sudo apt-get install google-chrome-stable
-      - 
-        name: Install Package
+          set -eux
+          # 1) 必要ツールインストール
+          sudo apt-get update -yqq
+          sudo apt-get install -yqq wget curl gnupg --no-install-recommends
+
+          # 2) GoogleのGPG鍵をバイナリ形式で保存 (apt-key非推奨対策)
+          sudo mkdir -p /usr/share/keyrings
+          curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
+            | gpg --dearmor \
+            | sudo tee /usr/share/keyrings/google-chrome.gpg > /dev/null
+
+          # 3) Google Chromeリポジトリ追加
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main" \
+            | sudo tee /etc/apt/sources.list.d/google-chrome.list
+
+          sudo apt-get update -yqq
+          sudo apt-get install -yqq google-chrome-stable --no-install-recommends
+
+          # (任意) キャッシュ削減
+          sudo rm -rf /var/lib/apt/lists/*
+
+      - name: Install Selenium (with Manager)
         run: |
-          pip install chromedriver-binary==94.*
-          pip install selenium
-      - 
-        name: Test Selenium
-        run: python test_selenium.py
+          pip install --upgrade pip
+          pip install selenium==4.10.0
+          # 例として最新版近辺を指定。Selenium 4.6以上ならManager搭載
+
+      - name: Run Selenium Test
+        run: |
+          python test_selenium.py
