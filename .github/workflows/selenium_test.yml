@@ -44,7 +44,7 @@ jobs:
       - name: Install Selenium (with Manager)
         run: |
           pip install --upgrade pip
-          pip install selenium==4.10.0
+          pip install -r requirements.txt
           # 例として最新版近辺を指定。Selenium 4.6以上ならManager搭載
 
       - name: Run Selenium Test
