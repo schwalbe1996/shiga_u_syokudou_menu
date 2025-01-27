@@ -44,22 +44,25 @@ jobs:
 
           # (任意) キャッシュ削減
           sudo rm -rf /var/lib/apt/lists/*
-      #スクリプト実行
-      - name: Install Selenium (with Manager)
-        run: |
-          pip install --upgrade pip
-          pip install -r requirements.txt
-          # 例として最新版近辺を指定。Selenium 4.6以上ならManager搭載
-
+      # (4) スクリプト実行
       - name: Run shiga_menu
         run: |
           python shiga_menu.py
-      # (3) CSV ファイルをコミット＆プッシュ
+
+      # (5) リモートの更新を取り込み（rebase）
+      #     → リモートに新しいコミットがあっても、こちらの変更を上書きせず履歴をきれいに融合
+      - name: Pull latest changes (rebase)
+        run: |
+          git pull --rebase origin main
+
+      # (6) CSV をコミット＆プッシュ
       - name: Commit and push CSV
         run: |
           git config --global user.email "actions@github.com"
           git config --global user.name "github-actions"
 
-          git add shiga_menu.csv  # 生成された CSV を指定
+          git add shiga_menu.csv
+          git commit -m "Add/Update CSV data from GitHub Actions" || echo "No changes to commit"
+          git push origin HEAD
           git commit -m "Add/Update CSV data from GitHub Actions" || echo "No changes to commit"
           git push origin HEAD
