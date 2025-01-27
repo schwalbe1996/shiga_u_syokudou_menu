@@ -1,0 +1,63 @@
+name: Save CSV from Python
+on:
+#  push:
+#    branches:
+#      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write   # リポジトリに対して書き込み(コミット)権限を持たせる
+
+jobs:
+  build:  
+    runs-on: ubuntu-latest
+    steps:
+      # (1) リポジトリをクローンし、プッシュできる資格情報を保持する
+      - name: Check out repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true  # push するために GitHub token を継続使用
+
+
+      # (2) 環境インストール
+      - name: Install Google Chrome
+        run: |
+          set -eux
+          # 1) 必要ツールインストール
+          sudo apt-get update -yqq
+          sudo apt-get install -yqq wget curl gnupg --no-install-recommends
+
+          # 2) GoogleのGPG鍵をバイナリ形式で保存 (apt-key非推奨対策)
+          sudo mkdir -p /usr/share/keyrings
+          curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
+            | gpg --dearmor \
+            | sudo tee /usr/share/keyrings/google-chrome.gpg > /dev/null
+
+          # 3) Google Chromeリポジトリ追加
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main" \
+            | sudo tee /etc/apt/sources.list.d/google-chrome.list
+
+          sudo apt-get update -yqq
+          sudo apt-get install -yqq google-chrome-stable --no-install-recommends
+
+          # (任意) キャッシュ削減
+          sudo rm -rf /var/lib/apt/lists/*
+      #スクリプト実行
+      - name: Install Selenium (with Manager)
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          # 例として最新版近辺を指定。Selenium 4.6以上ならManager搭載
+
+      - name: Run shiga_menu
+        run: |
+          python shiga_menu.py
+      # (3) CSV ファイルをコミット＆プッシュ
+      - name: Commit and push CSV
+        run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions"
+
+          git add data/menu_data.csv  # 生成された CSV を指定
+          git commit -m "Add/Update CSV data from GitHub Actions" || echo "No changes to commit"
+          git push origin HEAD
