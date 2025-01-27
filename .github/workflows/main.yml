@@ -1,4 +1,4 @@
-name: Save CSV from Python
+name: shiga_menu_seikyo
 on:
 #  push:
 #    branches:
