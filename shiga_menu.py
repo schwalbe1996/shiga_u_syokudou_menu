@@ -14,7 +14,8 @@ import time
 # ==========================
 # 子ページデータ取得関数
 # ==========================
-def scrape_child_page(url):
+def scrape_child_page(datas):
+    url =datas.get("url")
     response = requests.get(url)
     time.sleep(1)
     if response.status_code != 200:
@@ -34,7 +35,7 @@ def scrape_child_page(url):
     price = soup_sub.find("span", class_="price").text.strip() if soup_sub.find("span", class_="price") else "不明"
 
     # 栄養素データを保存
-    details = {"商品名": product_name, "価格（税込）": price}
+    details = {"カテゴリー":datas.get("cat_tag"),"商品名": product_name, "価格（税込）": price}
     for tags in li_tags:
         tag = tags.find("strong")
         val = tags.find("span", class_="price")
@@ -79,13 +80,22 @@ def get_menu_links():
 
         # ページ全体のHTMLからリンクを収集
         soup = BeautifulSoup(driver.page_source, "html.parser")
-        target_elements = soup.find_all("div", class_="catMenu")
-        for target_element in target_elements:
-            links = target_element.find_all("a")
-            for link in links:
-                href = link.get("href")
-                if href:
-                    menu_links.append("https://west2-univ.jp/sp/" + href)
+        target_class = "catMenu"
+        toggle_elems = soup.find_all("p", class_="toggleTitle open")
+
+        all_catmenus = []  # catMenuを保存するリスト
+
+        for p_tag in toggle_elems:
+            # <p> の直後の兄弟要素で class="catMenu" のものを取得
+
+            cat_menu_div = p_tag.find_next_sibling("div", class_=target_class)
+            if cat_menu_div:
+                links = cat_menu_div.find_all("a")
+                for link in links:
+                    href = link.get("href")
+                    if href:
+                        menu_links.append({"url":"https://west2-univ.jp/sp/" + href,"cat_tag":p_tag.text.strip().split()[0]})
+
     finally:
         driver.quit()
 
@@ -107,7 +117,7 @@ def main():
             all_data.append(details)
 
     # DataFrameに変換し、CSV形式で保存
-    columns = ["商品名", "価格（税込）", "エネルギー", "タンパク質", "脂質", "炭水化物", "食塩相当量", "カルシウム", "野菜量", "鉄", "ビタミン A", "ビタミン B1", "ビタミン B2", "ビタミン C"]
+    columns = ["カテゴリー","商品名", "価格（税込）", "エネルギー", "タンパク質", "脂質", "炭水化物", "食塩相当量", "カルシウム", "野菜量", "鉄", "ビタミン A", "ビタミン B1", "ビタミン B2", "ビタミン C"]
     df = pd.DataFrame(all_data, columns=columns)
     df.to_csv("shiga_menu.csv", index=False, encoding="shift-jis")
     print("データを shiga_menu.csv に保存しました。")
@@ -115,4 +125,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
