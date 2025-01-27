@@ -19,7 +19,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           persist-credentials: true  # push するために GitHub token を継続使用
-
+          fetch-depth: 0  # リモートの完全な履歴を取得（rebaseやマージに必要）
 
       # (2) 環境インストール
       - name: Install Google Chrome
@@ -56,11 +56,17 @@ jobs:
         run: |
           python shiga_menu.py
 
-      # (5) リモートの更新を取り込み（rebase）
+   # (5) リモートの更新を取り込み（rebase）
       #     → リモートに新しいコミットがあっても、こちらの変更を上書きせず履歴をきれいに融合
       - name: Pull latest changes (rebase)
         run: |
+          git config --global user.email "actions@github.com"
+          git config --global user.name "github-actions"
+
+          # スタッシュしてリモート更新を取り込む（未コミットの変更がある場合の対策）
+          git stash || echo "No local changes to stash"
           git pull --rebase origin main
+          git stash pop || echo "No stashed changes to apply"
 
       # (6) CSV をコミット＆プッシュ
       - name: Commit and push CSV
@@ -70,6 +76,4 @@ jobs:
 
           git add shiga_menu.csv
           git commit -m "Add/Update CSV data from GitHub Actions" || echo "No changes to commit"
-          git push origin HEAD
-          git commit -m "Add/Update CSV data from GitHub Actions" || echo "No changes to commit"
-          git push origin HEAD
+          git push origin HEAD || echo "No changes to push"
