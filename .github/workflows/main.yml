@@ -44,6 +44,13 @@ jobs:
 
           # (任意) キャッシュ削減
           sudo rm -rf /var/lib/apt/lists/*
+
+      #資源インストール
+      - name: Install Selenium (with Manager)
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          # 例として最新版近辺を指定。Selenium 4.6以上ならManager搭載
       # (4) スクリプト実行
       - name: Run shiga_menu
         run: |
