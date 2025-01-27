@@ -3,8 +3,13 @@ name: Convert CSV to HTML
 on:
   push:
     paths:
-      - shiga_menu.csv
-  workflow_dispatch:
+      - shiga_menu.csv  # 手動で更新された場合にトリガー
+  workflow_dispatch:  # 手動実行も可能にする
+  workflow_run:
+    workflows:
+      - main  # 依存するワークフロー名
+    types:
+      - completed  # 完了後に実行
 
 jobs:
   build:
