@@ -7,7 +7,7 @@ on:
   workflow_dispatch:  # 手動実行も可能にする
   workflow_run:
     workflows:
-      - main  # 依存するワークフロー名
+      - shiga_menu_seikyo  # 依存するワークフロー名
     types:
       - completed  # 完了後に実行
 
