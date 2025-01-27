@@ -119,7 +119,7 @@ def main():
     # DataFrameに変換し、CSV形式で保存
     columns = ["カテゴリー","商品名", "価格（税込）", "エネルギー", "タンパク質", "脂質", "炭水化物", "食塩相当量", "カルシウム", "野菜量", "鉄", "ビタミン A", "ビタミン B1", "ビタミン B2", "ビタミン C"]
     df = pd.DataFrame(all_data, columns=columns)
-    df.to_csv("shiga_menu.csv", index=False, encoding="shift-jis")
+    df.to_csv("shiga_menu.csv", index=False, encoding="utf8")
     print("データを shiga_menu.csv に保存しました。")
 
 
