@@ -4,10 +4,9 @@ on:
 #    branches:
 #      - main
   schedule:
-  
-  #  - cron: '0 22 * * 0' # 日曜日の22時 (UTC) = 月曜日の7時 (JST)
+    - cron: '0 22 * * 0' # 日曜日の22時 (UTC) = 月曜日の7時 (JST)
     # 毎週火曜日の6:00 +9=jst15時に実行
-    - cron: '0 6 * * 2'
+    #- cron: '0 6 * * 2'
 
     
   workflow_dispatch:
