@@ -1,0 +1,16 @@
+name: Request Google Indexing
+on:
+  push:
+    branches: [main]
+
+jobs:
+  request-index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: robingenz/action-google-indexing@v1.0.2
+        with:
+          # Search Console に登録したサイト（URL プレフィックス or ドメイン）
+          siteUrl: 'https://schwalbe1996.github.io/shiga_u_syokudou_menu/'
+          # GitHub Secrets に登録したサービスアカウント JSON
+          gcpServiceAccountKey: ${{ secrets.GCP_SA_KEY }}
