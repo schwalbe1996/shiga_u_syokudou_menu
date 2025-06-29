@@ -1,7 +1,11 @@
 name: Request Google Indexing
 on:
-  push:
-    branches: [main]
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Convert CSV to HTML
+    types:
+      - completed
 
 jobs:
   request-index:
