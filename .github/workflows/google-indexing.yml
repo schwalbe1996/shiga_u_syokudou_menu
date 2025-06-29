@@ -7,14 +7,25 @@ on:
     types:
       - completed
 
+
 jobs:
   request-index:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: robingenz/action-google-indexing@v1.0.2
+
+      # ← ここで .cache/<siteId> ディレクトリを先に作成
+      - name: Prepare cache directory for indexing action
+        run: |
+          mkdir -p .cache/https_schwalbe1996.github.io_shiga_u_syokudou_menu
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v1
         with:
-          # Search Console に登録したサイト（URL プレフィックス or ドメイン）
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Request indexing via Indexing API
+        uses: robingenz/action-google-indexing@v1.0.2
+        with:
           siteUrl: 'https://schwalbe1996.github.io/shiga_u_syokudou_menu/'
-          # GitHub Secrets に登録したサービスアカウント JSON
           gcpServiceAccountKey: ${{ secrets.GCP_SA_KEY }}
