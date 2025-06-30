@@ -27,5 +27,5 @@ jobs:
       - name: Request indexing via Indexing API
         uses: robingenz/action-google-indexing@v1.0.2
         with:
-          siteUrl: 'https://schwalbe1996.github.io/shiga_u_syokudou_menu/index.html'
+          siteUrl: 'https://schwalbe1996.github.io/shiga_u_syokudou_menu'
           gcpServiceAccountKey: ${{ secrets.GCP_SA_KEY }}
